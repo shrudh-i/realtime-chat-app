@@ -37,7 +37,7 @@ const Video = () => {
     peer = new Peer(undefined, {
       path: '/peerjs',
       host: '/',
-      port: 8000,
+      port: process.env.PORT || 8000,
     });
 
     peer.on('open', (id) => {
