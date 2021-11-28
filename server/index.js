@@ -1,16 +1,23 @@
+const socketio = require('socket.io')
 const express = require('express');
 const http = require('http');
+const cors = require('cors')
 const path = require('path');
 
+const port = process.env.PORT || 8000;
 const app = express();
 const server = http.createServer(app);
 const { ExpressPeerServer } = require('peer');
+const router = require('./router');
+io = socketio(server);
 
 const peerServer = ExpressPeerServer(server, {
   debug: true,
 });
 
 app.use('/peerjs', peerServer);
+app.use(router);
+app.use(cors());
 
 const io = require('socket.io')(server, {
   cors: {
@@ -46,7 +53,7 @@ io.on('connection', (socket) => {
   });
 });
 
-const port = process.env.PORT || 8000;
+
 server.listen(port, () => {
   console.log(`Running on Port: ${port}`);
 });
