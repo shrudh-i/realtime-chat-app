@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import io from 'socket.io-client';
 import Peer from 'peerjs';
 import { useParams } from 'react-router-dom';
-
+import { to_Decrypt, to_Encrypt } from "./aes.js";
 import './App.css';
 
 const SOCKET_URL = 'http://127.0.0.1:8000';
@@ -12,7 +12,7 @@ let peers = [];
 let socket = io(SOCKET_URL);
 
 const Video = () => {
-  const [message, setMessage] = useState('');
+  const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
   const [muted, setMuted] = useState(false);
   const [hideVideo, setHideVideo] = useState(false);
@@ -21,11 +21,13 @@ const Video = () => {
 
   useEffect(() => {
     const handleReceiveMessage = () => {
-      socket.on('createMessage', (message) => {
-        setMessages([...messages, message]);
+      socket.on("createMessage",(message) => {
+        const ans = to_Decrypt(message,peer.id);
+        console.log(ans);
+        setMessages([...messages,ans]);
       });
     };
-    setInterval(handleReceiveMessage(), 100);
+    setInterval(handleReceiveMessage(),100);
     return () => {
       socket.off();
     };
@@ -117,7 +119,7 @@ const Video = () => {
     videoGrid.append(video);
   };
 
-  // Handlining Mute And Unmute
+  // Handling Mute And Unmute
   const handleMuteUnmute = () => {
     const enabled = myStream.getAudioTracks()[0].enabled;
     if (enabled) {
@@ -129,7 +131,7 @@ const Video = () => {
     }
   };
 
-  //Handling video off and one
+  //Handling video off and on
   const handlePlayStopVideo = () => {
     const enabled = myStream.getVideoTracks()[0].enabled;
 
@@ -149,8 +151,9 @@ const Video = () => {
 
   const handleSendMessage = (event) => {
     event.preventDefault();
-    socket.emit('message', { message: message, userId: peer.id });
-    setMessage('');
+    const ans = to_Encrypt(message)
+    socket.emit('message', { message: ans, userId: peer.id });
+    setMessage("");
     event.target.reset();
   };
 
@@ -180,8 +183,8 @@ const Video = () => {
                   <i className="fa fa-microphone"></i>
                 </div>
               ) : (
-                <div id="muteButton" className="options-button" onClick={handleMuteUnmute}>
-                  <i class="fa fa-microphone-slash"></i>
+                <div id="muteButton" className="options-button">
+                  <i class="fas fa-microphone-slash"></i>
                 </div>
               )}
 
@@ -224,7 +227,6 @@ const Video = () => {
                 placeholder="Type message here..."
                 required
               />
-
               <button type="submit" id="send" className="options-button">
                 <i className="fab fa-telegram-plane"></i>
               </button>
