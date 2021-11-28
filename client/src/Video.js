@@ -5,7 +5,7 @@ import { useParams } from 'react-router-dom';
 import { to_Decrypt, to_Encrypt } from "./aes.js";
 import './App.css';
 
-const SOCKET_URL = 'http://127.0.0.1:8000/socket.io/socket.io.js';
+const SOCKET_URL = 'http://127.0.0.1:8000';
 
 let myStream, peer;
 let peers = [];
